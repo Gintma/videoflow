@@ -1,4 +1,5 @@
 # VideoFlow
+https://github.com/user-attachments/assets/a8cfef1f-784a-48f8-856d-9cdee878d91f
 
 VideoFlow 是一个本地运行的 AI 视频生产工作台。它可以把已经写好的中文旁白整理成分段脚本，生成分镜图、完整旁白音频、字幕时间轴，并最终渲染成 MP4。
 
