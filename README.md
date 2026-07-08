@@ -22,11 +22,26 @@ VideoFlow 是一个本地运行的 AI 视频生产工作台。它可以把已经
 - 用于脚本整理和图片生成的 OpenAI-compatible API Key
 - 用于旁白生成的 MiniMax API Key 和 voice ID
 
-如果 FFmpeg 不在 `PATH` 中，可以通过环境变量指定：
+如果要在最终视频里烧录字幕，FFmpeg 必须支持 `subtitles` 滤镜，通常需要启用 `libass`。可以这样检查：
+
+```bash
+ffmpeg -hide_banner -filters | grep subtitles
+```
+
+如果 FFmpeg 不在 `PATH` 中，或者你有多个 FFmpeg 版本，可以通过环境变量指定：
 
 ```bash
 export FFMPEG_PATH=/absolute/path/to/ffmpeg
 export FFPROBE_PATH=/absolute/path/to/ffprobe
+```
+
+也可以写入本地配置文件 `app-config.local.json`：
+
+```json
+{
+  "ffmpegPath": "/absolute/path/to/ffmpeg",
+  "ffprobePath": "/absolute/path/to/ffprobe"
+}
 ```
 
 ## 快速开始
@@ -54,6 +69,8 @@ http://127.0.0.1:5173
 - `baseUrl`：OpenAI-compatible API 地址，例如 `https://api.openai.com/v1`。
 - `model`：用于整理脚本的对话模型。
 - `apiKey`：用于脚本整理和图片生成的 API Key。
+- `ffmpegPath`：可选，指定 FFmpeg 路径。
+- `ffprobePath`：可选，指定 FFprobe 路径。
 - `image.model`：图片生成模型。
 - `audio.minimaxApiKey`：MiniMax API Key。
 - `audio.minimaxGroupId`：可选的 MiniMax Group ID。

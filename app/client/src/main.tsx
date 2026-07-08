@@ -455,6 +455,7 @@ function App() {
   const primaryJob = activeJobs.find((item) => item.projectId === project?.id) || Object.values(jobsByKey).find((item) => item.projectId === project?.id) || null;
   const visualJob = projectJob(jobsByKey, project?.id, "storyboards");
   const audioJob = projectJob(jobsByKey, project?.id, "audio");
+  const renderJob = projectJob(jobsByKey, project?.id, "render");
   const jobActive = hasActiveBlockingJob(jobsByKey, ["audio", "storyboards"]);
 
   React.useEffect(() => {
@@ -525,6 +526,7 @@ function App() {
           job={primaryJob}
           visualJob={visualJob}
           audioJob={audioJob}
+          renderJob={renderJob}
           activeJobs={activeJobs}
           jobActive={jobActive}
           actions={appActions}
@@ -724,6 +726,7 @@ function ProjectWorkspace({
   job,
   visualJob,
   audioJob,
+  renderJob,
   activeJobs,
   jobActive,
   actions,
@@ -739,6 +742,7 @@ function ProjectWorkspace({
   job: Job | null;
   visualJob: Job | null;
   audioJob: Job | null;
+  renderJob: Job | null;
   activeJobs: Job[];
   jobActive: boolean;
   actions: {
@@ -826,6 +830,7 @@ function ProjectWorkspace({
         job={job}
         visualJob={visualJob}
         audioJob={audioJob}
+        renderJob={renderJob}
         locked={jobActive}
       />
     </main>
@@ -970,6 +975,7 @@ function ActiveStepPanel(props: {
   job: Job | null;
   visualJob: Job | null;
   audioJob: Job | null;
+  renderJob: Job | null;
   locked: boolean;
   onCancelVisualJob: () => Promise<void>;
   actions: {
@@ -1032,7 +1038,7 @@ function ActiveStepPanel(props: {
     );
   }
   if (props.step === "video") {
-    return <VideoCard project={props.project} locked={props.locked} onRender={props.actions.renderVideo} onSaveVideoSettings={props.actions.saveVideoSettings} />;
+    return <VideoCard project={props.project} locked={props.locked} job={props.renderJob} onRefresh={props.actions.refreshAll} onRender={props.actions.renderVideo} onSaveVideoSettings={props.actions.saveVideoSettings} />;
   }
   return null;
 }
@@ -2118,9 +2124,11 @@ function VisualEditCard({ project, locked, job, onGenerate, onCancelJob, onListS
   );
 }
 
-function VideoCard({ project, locked, onRender, onSaveVideoSettings }: {
+function VideoCard({ project, locked, job, onRefresh, onRender, onSaveVideoSettings }: {
   project: Project | null;
   locked: boolean;
+  job: Job | null;
+  onRefresh: () => Promise<Project[]>;
   onRender: () => Promise<void>;
   onSaveVideoSettings: (videoSettings: VideoSettings) => Promise<void>;
 }) {
@@ -2129,6 +2137,7 @@ function VideoCard({ project, locked, onRender, onSaveVideoSettings }: {
   const finalSrc = project?.finalVideo ? `${projectAssetPath(project.id, project.finalVideo)}?v=${encodeURIComponent(project.updatedAt || project.finalVideo)}` : "";
   const settings = project?.videoSettings || { captionsEnabled: true, captionPosition: "bottom", bgmEnabled: true, playbackSpeed: 1 };
   const [draftSettings, setDraftSettings] = React.useState<VideoSettings>(settings);
+  const previousRenderJobActive = React.useRef(false);
 
   React.useEffect(() => {
     setDraftSettings({
@@ -2143,13 +2152,23 @@ function VideoCard({ project, locked, onRender, onSaveVideoSettings }: {
     || draftSettings.captionPosition !== settings.captionPosition
     || draftSettings.bgmEnabled !== settings.bgmEnabled
     || draftSettings.playbackSpeed !== (settings.playbackSpeed ?? 1);
+  const renderFailed = job?.status === "failed";
+  const renderError = renderFailed ? summarizeRenderError(job?.error || job.logs?.slice(-1)[0] || "渲染失败") : "";
+
+  React.useEffect(() => {
+    const active = Boolean(job && isJobActive(job));
+    const wasActive = previousRenderJobActive.current;
+    previousRenderJobActive.current = active;
+    if (wasActive && !active && job && ["done", "failed", "cancelled"].includes(job.status)) {
+      onRefresh().catch(() => undefined);
+    }
+  }, [job?.id, job?.status, onRefresh]);
 
   return (
     <Card className="mt-4">
       <CardHeader className="flex-row items-start justify-between gap-4 space-y-0">
         <div>
-          <CardTitle>{project?.script?.title || "成片预览"}</CardTitle>
-          <CardDescription>{project?.script?.subtitle || "用分镜图片、旁白和 BGM 拼接导出 MP4。"}</CardDescription>
+          <CardTitle>视频</CardTitle>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button disabled={!canRender || locked} onClick={onRender}>渲染最终视频</Button>
@@ -2157,6 +2176,11 @@ function VideoCard({ project, locked, onRender, onSaveVideoSettings }: {
         </div>
       </CardHeader>
       <CardContent className="grid gap-4">
+        {renderError ? (
+          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm leading-6 text-red-900">
+            {renderError}
+          </div>
+        ) : null}
         <div className="rounded-lg border border-zinc-200 bg-zinc-950 p-4">
           <div className="grid place-items-center rounded-md bg-black/30 p-3">
             {project?.finalVideo ? (
@@ -2257,6 +2281,14 @@ function VideoCard({ project, locked, onRender, onSaveVideoSettings }: {
       </CardContent>
     </Card>
   );
+}
+
+function summarizeRenderError(error: string) {
+  if (error.includes("No such filter: 'subtitles'") || error.includes("Filter not found")) {
+    return "渲染失败：当前 FFmpeg 不支持 subtitles 滤镜。你的视频页开启了字幕，所以无法烧录字幕。请换一个支持 libass/subtitles 的 FFmpeg，或在视频设置里关闭字幕后重新渲染。";
+  }
+  const firstLine = error.split(/\r?\n/).find((line) => line.trim());
+  return `渲染失败：${firstLine || error}`;
 }
 
 function JobPanel({ job, onCancel }: { job: Job | null; onCancel: () => Promise<void> }) {

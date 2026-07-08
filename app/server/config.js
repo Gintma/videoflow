@@ -9,9 +9,18 @@ const ASSETS_DIR = path.join(ROOT, "assets");
 const TEMPLATES_DIR = path.join(ROOT, "templates");
 const SETTINGS_FILE = path.join(ROOT, "app-config.local.json");
 
+function readLocalSettingsSync() {
+  try {
+    return JSON.parse(fs.readFileSync(SETTINGS_FILE, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+const LOCAL_SETTINGS = readLocalSettingsSync();
 const PORT = Number(process.env.PORT || 5173);
-const FFMPEG = process.env.FFMPEG_PATH || "ffmpeg";
-const FFPROBE = process.env.FFPROBE_PATH || "ffprobe";
+const FFMPEG = process.env.FFMPEG_PATH || LOCAL_SETTINGS.ffmpegPath || "ffmpeg";
+const FFPROBE = process.env.FFPROBE_PATH || LOCAL_SETTINGS.ffprobePath || "ffprobe";
 
 const DEFAULT_AUDIO_SETTINGS = {
   provider: "minimax",

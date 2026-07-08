@@ -3,6 +3,8 @@
   "model": "gpt-4.1-mini",
   "temperature": 0.7,
   "apiKey": "",
+  "ffmpegPath": "",
+  "ffprobePath": "",
   "image": {
     "model": "gpt-image-2",
     "quality": "medium",
