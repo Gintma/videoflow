@@ -1,0 +1,19 @@
+{
+  "id": "stickman",
+  "name": "火柴人极简解释图",
+  "description": "白底黑线火柴人，极简场景、清晰动作、少量彩色标注，适合把复杂概念画成一眼可懂的小剧场。",
+  "category": "illustration",
+  "aspectRatios": ["9:16", "16:9", "1:1", "4:5"],
+  "preview": {
+    "kind": "stickman"
+  },
+  "imageStyle": {
+    "promptFile": "image-style.md",
+    "background": "#ffffff",
+    "ink": "#111111",
+    "muted": "#555555",
+    "accent": "#f05a28",
+    "secondary": "#2367d1",
+    "surface": "#ffffff"
+  }
+}

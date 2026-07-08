@@ -1,0 +1,25 @@
+{
+  "baseUrl": "https://api.openai.com/v1",
+  "model": "gpt-4.1-mini",
+  "temperature": 0.7,
+  "apiKey": "",
+  "image": {
+    "model": "gpt-image-2",
+    "quality": "medium",
+    "outputFormat": "png"
+  },
+  "audio": {
+    "provider": "minimax",
+    "minimaxApiKey": "",
+    "minimaxGroupId": "",
+    "minimaxBaseUrl": "https://api.minimax.io",
+    "minimaxModel": "speech-2.8-hd",
+    "minimaxVoiceId": "",
+    "minimaxSpeed": 1,
+    "minimaxVolume": 1,
+    "minimaxPitch": 0,
+    "minimaxFormat": "wav",
+    "minimaxSampleRate": 32000,
+    "minimaxBitrate": 128000
+  }
+}
