@@ -1,35 +1,35 @@
 # VideoFlow
 
-VideoFlow is a local AI video production workspace. It turns a prepared narration script into segmented video copy, storyboard images, a full voiceover, captions, and a rendered MP4.
+VideoFlow 是一个本地运行的 AI 视频生产工作台。它可以把已经写好的中文旁白整理成分段脚本，生成分镜图、完整旁白音频、字幕时间轴，并最终渲染成 MP4。
 
-The app runs locally. API keys are stored only in `app-config.local.json`, which is ignored by git.
+应用完全在本机运行。API Key 只保存在 `app-config.local.json`，该文件已被 `.gitignore` 忽略，不会提交到仓库。
 
-## Features
+## 功能
 
-- Create projects with `9:16`, `16:9`, `1:1`, or `4:5` video ratios.
-- Clean and segment Chinese narration with an OpenAI-compatible chat model.
-- Generate one storyboard image for each segment.
-- Generate a complete MiniMax voiceover with captions and segment timings.
-- Preview storyboard images, voiceover, and final video.
-- Render MP4 with FFmpeg, captions, voiceover, and optional BGM.
-- Add reusable visual templates under `templates/<template-id>/`.
+- 新建项目，并选择 `9:16`、`16:9`、`1:1`、`4:5` 视频比例。
+- 使用 OpenAI-compatible 大模型清洗中文旁白并拆分成适合配音和配图的段落。
+- 为每个 segment 生成一张分镜图。
+- 使用 MiniMax 一次生成完整旁白音频、字幕和 segment 时间轴。
+- 预览分镜图、旁白音频和最终视频。
+- 使用 FFmpeg 合成图片、旁白、字幕和可选 BGM，导出 MP4。
+- 通过 `templates/<template-id>/` 添加可复用的视觉模板。
 
-## Requirements
+## 环境要求
 
-- Node.js 20 or newer
+- Node.js 20 或更高版本
 - npm
-- FFmpeg and FFprobe available in `PATH`
-- An OpenAI-compatible API key for script and image generation
-- A MiniMax API key and voice ID for voiceover generation
+- `PATH` 中可用的 FFmpeg 和 FFprobe
+- 用于脚本整理和图片生成的 OpenAI-compatible API Key
+- 用于旁白生成的 MiniMax API Key 和 voice ID
 
-If FFmpeg is not in `PATH`, set:
+如果 FFmpeg 不在 `PATH` 中，可以通过环境变量指定：
 
 ```bash
 export FFMPEG_PATH=/absolute/path/to/ffmpeg
 export FFPROBE_PATH=/absolute/path/to/ffprobe
 ```
 
-## Quick Start
+## 快速开始
 
 ```bash
 npm install
@@ -37,38 +37,38 @@ cp app-config.example.json app-config.local.json
 npm run dev
 ```
 
-Open:
+打开：
 
 ```text
 http://127.0.0.1:5173
 ```
 
-You can also configure models from the settings dialog in the app. Values saved there update `app-config.local.json`.
+你也可以直接在应用里的“模型设置”弹窗中配置模型。保存后的配置会写入本机的 `app-config.local.json`。
 
-## Configuration
+## 配置
 
-`app-config.local.json` is intentionally not committed. Use `app-config.example.json` as the template.
+`app-config.local.json` 不会提交到 git。首次使用可以复制 `app-config.example.json` 作为模板。
 
-Main fields:
+主要字段：
 
-- `baseUrl`: OpenAI-compatible API base URL, for example `https://api.openai.com/v1`.
-- `model`: Chat model used for script cleanup.
-- `apiKey`: API key for chat and image generation.
-- `image.model`: Image generation model.
-- `audio.minimaxApiKey`: MiniMax API key.
-- `audio.minimaxGroupId`: Optional MiniMax group ID.
-- `audio.minimaxVoiceId`: MiniMax voice ID.
+- `baseUrl`：OpenAI-compatible API 地址，例如 `https://api.openai.com/v1`。
+- `model`：用于整理脚本的对话模型。
+- `apiKey`：用于脚本整理和图片生成的 API Key。
+- `image.model`：图片生成模型。
+- `audio.minimaxApiKey`：MiniMax API Key。
+- `audio.minimaxGroupId`：可选的 MiniMax Group ID。
+- `audio.minimaxVoiceId`：MiniMax voice ID。
 
-## Workflow
+## 使用流程
 
-1. Create a project and choose a video ratio plus visual template.
-2. Paste prepared narration in the content page.
-3. Click start to let the model clean and segment the script.
-4. Generate storyboard images.
-5. Generate the full voiceover.
-6. Render the final MP4.
+1. 新建项目，选择视频比例和视觉模板。
+2. 在“内容”页粘贴已经写好的完整旁白。
+3. 点击开始整理，让模型清洗文本并拆分 segment。
+4. 生成分镜图。
+5. 生成完整旁白。
+6. 渲染最终 MP4。
 
-Generated files are written to:
+生成文件会写入：
 
 ```text
 projects/<project-id>/
@@ -86,11 +86,11 @@ projects/<project-id>/
   renders/final.mp4
 ```
 
-The `projects/` directory is ignored by git except for documentation placeholders.
+`projects/` 目录默认被 git 忽略，只保留说明文件和占位文件。
 
-## Templates
+## 视觉模板
 
-Visual templates live in:
+视觉模板位于：
 
 ```text
 templates/<template-id>/
@@ -98,42 +98,40 @@ templates/<template-id>/
   image-style.md
 ```
 
-The current built-in template is:
+当前内置模板：
 
-- `stickman`: minimal whiteboard Chinese explainer illustrations.
+- `stickman`：极简白板中文解释图风格。
 
-See `templates/README.md` for template metadata and prompt guidance.
+模板元数据和提示词编写方式见 `templates/README.md`。
 
-## BGM Asset
+## BGM 和字体
 
-The app looks for `assets/bgm.mp3` when background music is enabled. Replace it with your own licensed audio before publishing or distributing rendered videos.
+应用会在开启 BGM 时读取 `assets/bgm.mp3`。发布或分发成片前，请确认你有权使用该音频。
 
-If you are publishing a public fork, make sure every asset in `assets/` has a license that allows redistribution.
+字幕渲染可以使用 `assets/fonts/` 中的可选字体文件。不要提交没有再分发授权的系统字体或商业字体。
 
-Optional subtitle fonts can be placed in `assets/fonts/`. Do not commit proprietary system fonts unless their license allows redistribution.
-
-## Scripts
+## 常用脚本
 
 ```bash
-npm run dev          # build client and start the local server
-npm run start        # start the server using the existing client build
-npm run check        # type-check the client and syntax-check the server
-npm run client:dev   # run Vite dev server for frontend-only development
-npm run client:build # build the frontend
+npm run dev          # 构建前端并启动本地服务
+npm run start        # 使用已有前端构建产物启动服务
+npm run check        # 检查前端类型和后端语法
+npm run client:dev   # 启动前端 Vite 开发服务
+npm run client:build # 构建前端
 ```
 
-See `CONTRIBUTING.md` and `SECURITY.md` before publishing a fork or sending changes.
+发布 fork 或提交修改前，建议阅读 `CONTRIBUTING.md` 和 `SECURITY.md`。
 
-## Health Check
+## 健康检查
 
-After starting the server:
+启动服务后可以检查运行环境：
 
 ```bash
 curl http://127.0.0.1:5173/api/health
 ```
 
-This reports whether FFmpeg, FFprobe, MiniMax settings, and BGM are available.
+该接口会返回 FFmpeg、FFprobe、MiniMax 配置和 BGM 是否可用。
 
-## License
+## 许可证
 
 MIT
